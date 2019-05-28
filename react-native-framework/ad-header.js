@@ -1,7 +1,14 @@
+/*
+
+Header with several options, like title or custom component,
+back button, right component....
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { setKeyValue, setValidation } from "./ad-reducer";
+import { setKeyValue } from "./ad-reducer";
 
 const thisProps = ["style", "backButton", "title"];
 
@@ -55,13 +62,16 @@ class AdHeader extends React.Component {
     let right;
 
     if (this.props.title) {
-      right = this.props.children;
+      if (this.props.children) right = this.props.children;
+      else {
+        right = <View />;
+      }
     } else {
       right = <View />;
     }
 
     return (
-      <View>
+      <React.Fragment>
         <AdTopFix style={this.props.style.topFix} />
         <View
           {...nativeProps}
@@ -78,7 +88,7 @@ class AdHeader extends React.Component {
           {middle}
           {right}
         </View>
-      </View>
+      </React.Fragment>
     );
   }
 }

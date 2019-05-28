@@ -1,3 +1,10 @@
+/*
+
+This is the main reusable logic for whole app. Another logic file must be provided
+and use this class in many ways.
+
+*/
+
 import AdValidation from "./ad-validation";
 import AdLocal from "./ad-localization";
 import { serialize } from "./ad-utils";
@@ -11,7 +18,7 @@ export const REMOVE_VALUE = "core/removeValue";
 export const SET_KEY_VALUE = "core/setKeyValue";
 export const SET_ARRAY_ELEMENT = "core/setArrayElement";
 export const SORT_ARRAY_BY_FIELD = "core/sortArrayByField";
-export const SET_VALIDATION = "core/setValidation";
+export const SET_DEEP_KEY_VALUE = "core/setDeepKeyValue";
 
 let submitters, API_BASE_URL;
 
@@ -73,14 +80,14 @@ export const reducer = (state, action) => {
       );
       newState[action.field][action.key] = action.value;
       return newState;
-    case SET_VALIDATION:
+    case SET_DEEP_KEY_VALUE:
       var newState = { ...state };
-      var newValidation = newState.fields.validation
-        ? { ...newState.fields.validation }
+      var newChild = newState[action.parentKey][action.childKey]
+        ? { ...newState[action.parentKey][action.childKey] }
         : {};
-      newValidation[action.key] = action.value;
-      newState.fields = { ...newState.fields, validation: newValidation };
-      console.log(newState);
+      newChild[action.key] = action.value;
+      newState[action.parentKey] = { ...newState[action.parentKey] };
+      newState[action.parentKey][action.childKey] = newChild;
       return newState;
     case SET_ARRAY_ELEMENT:
       var newState = { ...state };
@@ -187,9 +194,11 @@ export function setKeyValue(field, key, value) {
   };
 }
 
-export function setValidation(key, value) {
+export function setDeepKeyValue(parent, child, key, value) {
   return {
-    type: SET_VALIDATION,
+    type: SET_DEEP_KEY_VALUE,
+    parentKey: parent,
+    childKey: child,
     key: key,
     value: value
   };
@@ -218,19 +227,27 @@ export const formSubmit = (formName, fields, navigate) => {
       fieldsParsed[k.split(".")[1]] = fields[k];
     }
 
+    dispatch(setKeyValue("formState", formName, "loading"));
     dispatch(submitters[formName](fieldsParsed, navigate));
 
     setTimeout(function() {
       for (let k in fields) {
         dispatch(setKeyValue("fields", k, ""));
       }
-    }, 1000);
+    }, 5000);
   };
 };
 
 export const directSubmit = (formName, fields = {}) => {
   return function(dispatch, getState) {
+    dispatch(setKeyValue("formState", formName, "loading"));
     dispatch(submitters[formName](fields));
+  };
+};
+
+export const finalizeSubmit = formName => {
+  return function(dispatch) {
+    dispatch(setKeyValue("formState", formName, "ready"));
   };
 };
 
@@ -252,6 +269,8 @@ export const fetchList = (
 
         dispatch(setKeyValue("formData", formName, mappedData));
         dispatch(setKeyValue("_formData", formName, mappedData));
+
+        dispatch(finalizeSubmit(formName));
       },
       getState().authToken
     );
@@ -269,7 +288,7 @@ export const fetchItem = (
   return function(dispatch, getState) {
     getApi(
       path,
-      { id: key },
+      key ? { id: key } : {},
       dispatch,
       response => {
         let mappedData = mapFetchData(response.data, map, filter, responsePath);
@@ -277,21 +296,29 @@ export const fetchItem = (
         for (let k in mappedData) {
           dispatch(setKeyValue("fields", formName + "." + k, mappedData[k]));
         }
+
+        dispatch(finalizeSubmit(formName));
       },
       getState().authToken
     );
   };
 };
 
+const getDataFromPath = (data, responsePath) => {
+  let pathParts = responsePath.split("/");
+  for (let i = 0; i < pathParts.length; i++) {
+    data = data[pathParts[i]];
+  }
+  return data;
+};
+
 const mapFetchData = (inData, map, filter, responsePath) => {
   let data;
 
-  data = inData;
   if (responsePath !== "") {
-    let pathParts = responsePath.split("/");
-    for (let i = 0; i < pathParts.length; i++) {
-      data = data[pathParts[i]];
-    }
+    data = getDataFromPath(inData, responsePath);
+  } else {
+    data = inData;
   }
 
   let mappedData;
@@ -303,7 +330,7 @@ const mapFetchData = (inData, map, filter, responsePath) => {
       let a = data[i];
       let nA = {};
       for (let k in map) {
-        nA[k] = a[map[k]];
+        nA[k] = getDataFromPath(a, map[k]);
       }
 
       mappedData.push(nA);
@@ -312,7 +339,7 @@ const mapFetchData = (inData, map, filter, responsePath) => {
     mappedData = {};
 
     for (let k in map) {
-      mappedData[k] = data[map[k]];
+      mappedData[k] = getDataFromPath(data, map[k]);
     }
   }
 
@@ -321,14 +348,14 @@ const mapFetchData = (inData, map, filter, responsePath) => {
   return mappedData;
 };
 
-export const update = (formNAme, path, args, onSuccess) => {
+export const update = (path, args, onSuccess = null) => {
   return function(dispatch, getState) {
     postApi(
       path,
       args,
       dispatch,
       function(response) {
-        onSuccess(response.data.message);
+        parseApiResponse(response, onSuccess, dispatch);
       },
       getState().authToken
     );
@@ -339,7 +366,7 @@ export const parseApiResponse = (response, callback, dispatch) => {
   if (response.data.isSuccess === false) {
     dispatchError(dispatch, response.data.message);
   } else {
-    callback(response);
+    if (callback) callback(response);
   }
 };
 

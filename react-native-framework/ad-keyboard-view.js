@@ -1,3 +1,9 @@
+/*
+
+A view that arranges it self according to keyboar state (shown/hidden)
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { View, Keyboard, Dimensions } from "react-native";

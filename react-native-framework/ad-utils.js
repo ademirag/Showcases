@@ -1,4 +1,11 @@
+/*
+
+Utilities
+
+*/
+
 import { Dimensions, Platform } from "react-native";
+import AdLocal from "./ad-localization";
 
 export function isIphoneX() {
   const dim = Dimensions.get("window");
@@ -67,4 +74,15 @@ export function formatPhone(number) {
       "+" + rPart4 + " (" + rPart3 + ") " + rPart2 + " " + rPart1 + " " + rPart0
     );
   }
+}
+
+export function formatDate(date) {
+  date = new Date(date);
+  var monthNames = AdLocal.getMonthNames();
+
+  var day = date.getDate();
+  var monthIndex = date.getMonth();
+  var year = date.getFullYear();
+
+  return day + " " + monthNames[monthIndex] + " " + year;
 }

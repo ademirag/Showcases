@@ -1,9 +1,20 @@
+/*
+
+Form information connected text input with several options.
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { TextInput, View, StyleSheet, TouchableOpacity } from "react-native";
-import { setKeyValue, setValue, setValidation, formSubmit } from "./ad-reducer";
+import {
+  setKeyValue,
+  setValue,
+  setDeepKeyValue,
+  formSubmit
+} from "./ad-reducer";
 
-const thisProps = ["fieldName", "validation", "fieldTitle"];
+const thisProps = ["fieldName", "style", "validation", "fieldTitle"];
 
 import AdValidation from "./ad-validation";
 import AdFormSubmitter from "./ad-form-submitter";
@@ -17,6 +28,7 @@ class AdTextInput extends React.Component {
     this.onBlur = this.onBlur.bind(this);
     this.onFocus = this.onFocus.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.onReset = this.onReset.bind(this);
 
     this.state = {
       clearable: false
@@ -33,16 +45,6 @@ class AdTextInput extends React.Component {
   }
 
   validate(text) {
-    if (text === "") {
-      this.setState({
-        clearable: false
-      });
-    } else {
-      this.setState({
-        clearable: true
-      });
-    }
-
     let isValid = this.props.validation
       ? AdValidation.validate(
           text,
@@ -79,28 +81,58 @@ class AdTextInput extends React.Component {
     ) {
       this.showErrorMessage(isValid);
     }
-
     this.props.setField(this.props.fieldName, text, isValid);
+
+    if (this.getValue() === "") {
+      this.setState({
+        clearable: false
+      });
+    } else {
+      this.setState({
+        clearable: true
+      });
+    }
   }
 
-  onReset() {
+  onReset(e) {
     this.onChangeText("");
+
+    this.setState({
+      clearable: false
+    });
   }
 
   onBlur() {
-    if (this.props.validation.indexOf("showValidation:onBlur") !== -1) {
+    if (
+      this.props.validation &&
+      this.props.validation.indexOf("showValidation:onBlur") !== -1
+    ) {
       let isValid = this.validate(this.getValue());
 
       if (typeof isValid === "string") {
         this.showErrorMessage(isValid);
       }
     }
+
+    this.setState({
+      clearable: false
+    });
   }
 
   onFocus() {
     this.element.measureInWindow((x, y, w, h) => {
       this.props.setFocusedY(y);
     });
+
+    if (this.getValue() === "") {
+      this.setState({
+        clearable: false
+      });
+    } else {
+      this.setState({
+        clearable: true
+      });
+    }
   }
 
   showErrorMessage(msg) {
@@ -144,8 +176,13 @@ class AdTextInput extends React.Component {
       ? { onSubmitEditing: this.onSubmit }
       : {};
 
+    let specialStyleInput;
+    if (typeof this.props.specialStyle !== "undefined") {
+      specialStyleInput = "input" + this.props.specialStyle;
+    }
+
     return (
-      <View>
+      <View style={this.props.style.view}>
         <TextInput
           ref={el => (this.element = el)}
           value={v}
@@ -153,21 +190,19 @@ class AdTextInput extends React.Component {
           onChangeText={text => this.onChangeText(text)}
           onBlur={() => this.onBlur()}
           onFocus={() => this.onFocus()}
+          style={[this.props.style.input, this.props.style[specialStyleInput]]}
           {...submitterEvent}
           {...nativeProps}
         />
         <TouchableOpacity
-          onPress={() => this.onReset()}
+          onPress={e => this.onReset(e)}
           style={{
             position: "absolute",
             right: 0,
             display: this.state.clearable ? "flex" : "none"
           }}
         >
-          <AdIcon
-            style={[this.props.style, { borderWidth: 0, top: pad - 3 }]}
-            name={"timesCircle"}
-          />
+          <AdIcon style={this.props.style.clearIcon} name={"timesCircle"} />
         </TouchableOpacity>
       </View>
     );
@@ -183,7 +218,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   setField: (n, v, iv) => {
     dispatch(setKeyValue("fields", n, v));
-    dispatch(setValidation(n, iv));
+    dispatch(setDeepKeyValue("fields", "validation", n, iv));
   },
   submit: (fn, fs, nv) => {
     dispatch(formSubmit(fn, fs, nv));

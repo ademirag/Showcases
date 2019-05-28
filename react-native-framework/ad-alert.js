@@ -1,3 +1,9 @@
+/*
+
+The application global alert box, should be inserted in a quite parent view.
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { TouchableOpacity, View } from "react-native";
@@ -30,7 +36,6 @@ class AdAlert extends React.Component {
           this.el.setNativeProps({ style: { opacity: p } });
         });
       }
-
       this.setState({ visible: true });
     } else if (
       prevProps.formAlert === true &&
@@ -65,11 +70,11 @@ class AdAlert extends React.Component {
             ? {
                 display: "flex",
                 opacity: 0,
-                flex: 1,
                 height: "100%",
                 width: "100%",
                 position: "absolute",
-                bottom: 0
+                top: 0,
+                left: 0
               }
             : { display: "none", opacity: 0 }
         }

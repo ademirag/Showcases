@@ -1,3 +1,9 @@
+/*
+
+Submit the forms.
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { TouchableOpacity } from "react-native";
@@ -38,11 +44,15 @@ class AdFormSubmitter extends React.Component {
   }
 
   render() {
-    return (
-      <TouchableOpacity onPress={this.onSubmit} style={this.props.style}>
-        {this.props.children}
-      </TouchableOpacity>
-    );
+    if (this.props.customComponent) {
+      return this.props.customComponent(this.onSubmit);
+    } else {
+      return (
+        <TouchableOpacity onPress={this.onSubmit} style={this.props.style}>
+          {this.props.children}
+        </TouchableOpacity>
+      );
+    }
   }
 }
 

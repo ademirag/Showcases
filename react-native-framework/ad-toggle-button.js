@@ -1,7 +1,13 @@
+/*
+
+A toggle button
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { TouchableOpacity, View, Text } from "react-native";
-import { setKeyValue, setValidation } from "./ad-reducer";
+import { setKeyValue, setDeepKeyValue } from "./ad-reducer";
 
 const thisProps = ["fieldName", "validation", "fieldTitle"];
 
@@ -84,7 +90,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   setField: (n, v, iv) => {
     dispatch(setKeyValue("fields", n, v));
-    dispatch(setValidation(n, iv));
+    dispatch(setDeepKeyValue("fields", "validation", n, iv));
   }
 });
 

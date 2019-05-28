@@ -1,3 +1,9 @@
+/*
+
+All icons from FontAwsome free and LineAwesome
+
+*/
+
 import React from "react";
 import { Text } from "react-native";
 
@@ -1205,7 +1211,9 @@ export const Icons = {
   youtube: "\uf167",
   youtubeSquare: "\uf431",
   zhihu: "\uf63f",
-  la_mapMaker: "\uf27d"
+  la_mapMaker: "\uf27d",
+  la_check: "\uf17b",
+  la_phone: "\uf2b3"
 };
 
 const IconTypes = {

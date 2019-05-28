@@ -1,3 +1,9 @@
+/*
+
+Text tab segments that can be scrolled horizontally
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { Text, View, TouchableOpacity, YellowBox } from "react-native";

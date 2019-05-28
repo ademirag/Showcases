@@ -1,3 +1,9 @@
+/*
+
+Form validator with localization enabled
+
+*/
+
 import AdLocal from "./ad-localization";
 
 export default class AdValidation {
@@ -37,7 +43,7 @@ export default class AdValidation {
   }
 
   static validate(value, validation, title) {
-    if (typeof value === "object") {
+    if (typeof value === "object" && value !== null) {
       if (validation === "required" && value.value === null) {
         return AdValidation._requiredField(title);
       } else {
@@ -45,13 +51,9 @@ export default class AdValidation {
       }
     }
 
-    if (typeof value !== "string") throw "AdValidation Input Type Error";
-
     let validators = validation.split(",");
 
     const vl = validators.length;
-    const emailRe = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
     for (let i = 0; i < vl; i++) {
       let validator = validators[i];
 
@@ -66,7 +68,8 @@ export default class AdValidation {
         }
         return AdValidation._invalidPhone(title);
       } else {
-        return AdValidation.doValidation(validator, value, title);
+        let curRes = AdValidation.doValidation(validator, value, title);
+        if (curRes !== true) return curRes;
       }
     }
 
@@ -76,11 +79,13 @@ export default class AdValidation {
   static doValidation(validator, value, title) {
     switch (validator) {
       case "required":
-        if (value === "") {
+        if (value === "" || typeof value === "undefined" || value === false) {
           return AdValidation._requiredField(title);
         }
         break;
       case "email":
+        const emailRe = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
         if (!emailRe.test(String(value).toLowerCase())) {
           return AdValidation._invalidEmail(title);
         }

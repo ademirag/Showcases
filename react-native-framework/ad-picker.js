@@ -1,7 +1,13 @@
+/*
+
+Form information connected picker with several options.
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { TextInput, Platform, View } from "react-native";
-import { setKeyValue, setValidation } from "./ad-reducer";
+import { setKeyValue, setDeepKeyValue } from "./ad-reducer";
 import RNPickerSelect from "react-native-picker-select";
 import AdValidation from "./ad-validation";
 import AdIcon from "./ad-icon";
@@ -19,6 +25,22 @@ class AdPicker extends React.Component {
     };
   }
 
+  componentDidMount() {
+    if (this.props.fields[this.props.fieldName]) {
+      let l = this.props.items.length;
+      for (let i = 0; i < l; i++) {
+        if (
+          this.props.items[i].value === this.props.fields[this.props.fieldName]
+        ) {
+          this.setState({
+            curLabel: this.props.items[i].label
+          });
+          break;
+        }
+      }
+    }
+  }
+
   validate(val) {
     let isValid = this.props.validation
       ? AdValidation.validate(val, this.props.validation, this.props.fieldTitle)
@@ -28,7 +50,12 @@ class AdPicker extends React.Component {
   }
 
   onChange(val) {
-    let isValid = this.validate(this.props.items[val]);
+    let isValid;
+    if (val === 0) {
+      isValid = this.validate("");
+    } else {
+      isValid = this.validate(this.props.items[val - 1]);
+    }
 
     if (
       typeof isValid === "string" &&
@@ -36,7 +63,6 @@ class AdPicker extends React.Component {
     ) {
       this.showErrorMessage(isValid);
     }
-
     if (val > 0) {
       this.setState({
         curLabel: this.props.items[val - 1].label
@@ -100,7 +126,10 @@ class AdPicker extends React.Component {
     }
 
     return (
-      <RNPickerSelect {...props}>
+      <RNPickerSelect
+        {...props}
+        value={this.props.fields[this.props.fieldName]}
+      >
         <View
           style={{
             alignItems: "center"
@@ -145,7 +174,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   setField: (n, v, iv) => {
     dispatch(setKeyValue("fields", n, v));
-    dispatch(setValidation(n, iv));
+    dispatch(setDeepKeyValue("fields", "validation", n, iv));
   }
 });
 

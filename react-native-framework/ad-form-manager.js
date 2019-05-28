@@ -1,3 +1,9 @@
+/*
+
+Switches form state between view / edit
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { View, TouchableOpacity } from "react-native";
@@ -37,7 +43,12 @@ class AdFormManager extends React.Component {
       <View {...nativeProps} style={[this.props.style.view]}>
         {st === "view" && (
           <TouchableOpacity
-            onPress={() => this.props.onPress("edit", this.props.formName)}
+            onPress={() => {
+              if (this.props.onFormStateChange) {
+                this.props.onFormStateChange("edit");
+              }
+              this.props.onPress("edit", this.props.formName);
+            }}
           >
             {this.props.editButton}
           </TouchableOpacity>
@@ -46,13 +57,23 @@ class AdFormManager extends React.Component {
         {st === "edit" && (
           <View>
             <TouchableOpacity
-              onPress={() => this.props.onPress("view", this.props.formName)}
+              onPress={() => {
+                if (this.props.onFormStateChange) {
+                  this.props.onFormStateChange("view");
+                }
+                this.props.onPress("view", this.props.formName);
+              }}
             >
               {this.props.cancelButton}
             </TouchableOpacity>
             <AdFormSubmitter
               formName={this.props.formName}
-              onPress={() => this.props.onPress("view", this.props.formName)}
+              onPress={() => {
+                if (this.props.onFormStateChange) {
+                  this.props.onFormStateChange("view");
+                }
+                this.props.onPress("view", this.props.formName);
+              }}
             >
               {this.props.saveButton}
             </AdFormSubmitter>

@@ -1,3 +1,10 @@
+/*
+
+It's about localization in terms of strings. Persistence language selection
+is enabled.
+
+*/
+
 import { NativeModules, Platform } from "react-native";
 import AdSettings from "./ad-settings";
 
@@ -43,6 +50,12 @@ export default class AdLocal {
     if (typeof val === "undefined") {
       return "";
     }
+
+    return val;
+  }
+
+  static getMonthNames() {
+    let val = AdLocal.strings["_months"][AdLocal.lang];
 
     return val;
   }

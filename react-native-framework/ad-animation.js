@@ -1,3 +1,9 @@
+/*
+
+UI independent ticker.
+
+*/
+
 const animations = [];
 
 let tickerInterval = null;

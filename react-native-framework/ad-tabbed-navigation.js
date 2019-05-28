@@ -1,3 +1,9 @@
+/*
+
+Bottom bar with tab buttons, and their navigations.
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import {
@@ -9,6 +15,7 @@ import {
   Easing
 } from "react-native";
 import { setValue } from "./ad-reducer";
+import AdBottomFix from "./ad-bottom-fix";
 import { AdTicker } from "./ad-animation";
 import { isIphoneX } from "./ad-utils";
 
@@ -35,6 +42,7 @@ class AdTabbedNavigation extends React.Component {
 
   navigate(id) {
     if (this.state.cur === id || this.state.next !== null) return;
+    this.props.animate(true);
     this.setState({
       next: id
     });
@@ -44,7 +52,7 @@ class AdTabbedNavigation extends React.Component {
     if (this.state.next !== null && this.state.next != prevState.next) {
       Animated.timing(this.state.leftAnimatedValue, {
         toValue: -100,
-        duration: 250,
+        duration: 150,
         easing: Easing.linear,
         useNativeDriver: true
       }).start(() => {
@@ -52,6 +60,7 @@ class AdTabbedNavigation extends React.Component {
           cur: this.state.next,
           next: null
         });
+        this.props.animate(false);
         this.state.leftAnimatedValue.setValue(0);
       });
 
@@ -114,7 +123,7 @@ class AdTabbedNavigation extends React.Component {
               style={
                 this.state.cur === tabButton.name
                   ? { tintColor: tabButton.tintColor }
-                  : {}
+                  : { tintColor: tabButton.unselectedTintColor }
               }
             />
           </View>
@@ -135,6 +144,7 @@ class AdTabbedNavigation extends React.Component {
           <View style={styles.stackScreen}>{cur}</View>
         </View>
         <View style={[this.props.data.barStyle, styles.bar]}>{tabButtons}</View>
+        <AdBottomFix style={this.props.data.bottomFixStyle} />
       </View>
     );
   }
@@ -143,12 +153,12 @@ class AdTabbedNavigation extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0)",
-    alignContent: "flex-end"
+    backgroundColor: "rgba(0,0,0,0)"
   },
   bar: {
     justifyContent: isIphoneX() ? "space-around" : "space-between",
-    flexDirection: "row"
+    flexDirection: "row",
+    flex: 1
   },
   stackScreen: {
     left: 0,
@@ -169,7 +179,9 @@ const mapStateToProps = state => {
   return {};
 };
 
-const mapDispatchToProps = dispatch => ({});
+const mapDispatchToProps = dispatch => ({
+  animate: v => dispatch(setValue("formAnimation", v))
+});
 
 export default connect(
   mapStateToProps,

@@ -1,3 +1,10 @@
+/*
+
+Stack navigation where screens added comes from right to the left,
+with 'back' enabled.
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import {
@@ -153,9 +160,9 @@ class AdStackNavigation extends React.Component {
 
   render() {
     const Cur = this.props.data[this.state.cur];
-
     let Next = null;
     if (this.state.next !== null) {
+      console.log(this.props.data, this.state.next);
       Next = this.props.data[this.state.next];
     }
 
@@ -186,13 +193,13 @@ class AdStackNavigation extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0)"
+    flex: 1
   },
   stackScreen: {
     left: 0,
     top: 0,
     width: "100%",
+    height: "100%",
     position: "absolute"
   },
   stackTransitionIn: {

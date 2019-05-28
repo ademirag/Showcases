@@ -1,3 +1,9 @@
+/*
+
+A Twitter's Tweet Button
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { View, TouchableOpacity } from "react-native";

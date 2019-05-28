@@ -1,3 +1,10 @@
+/*
+
+Field based on view and edit states. In view mode it shows the value,
+in edit mode it shows related input component provided.
+
+*/
+
 import React from "react";
 import { connect } from "react-redux";
 import { View, FlatList, Text } from "react-native";
@@ -12,10 +19,7 @@ class AdField extends React.Component {
     this.onSelect = this.onSelect.bind(this);
 
     this.state = {
-      data: this.props.fields[this.props.fieldName],
-      mode: this.props.formState
-        ? this.props.formState[this.props.formName]
-        : this.props.formState
+      data: this.props.fields[this.props.fieldName]
     };
   }
 
@@ -26,13 +30,15 @@ class AdField extends React.Component {
       });
     }
 
-    if (
-      this.props.formState &&
-      this.props.formState[this.props.formName] !== this.state.formState
-    ) {
-      this.setState({
-        formState: this.props.formState[this.props.formName]
-      });
+    if (!this.props.mode) {
+      if (
+        this.props.formState &&
+        this.props.formState[this.props.formName] !== this.state.formState
+      ) {
+        this.setState({
+          formState: this.props.formState[this.props.formName]
+        });
+      }
     }
   }
 
@@ -49,11 +55,23 @@ class AdField extends React.Component {
       }
     }
 
+    let viewSpecialStyle;
+    if (typeof this.props.specialStyle !== "undefined") {
+      viewSpecialStyle = "view" + this.props.specialStyle;
+    }
+
+    let mode = this.props.mode ? this.props.mode : this.state.formState;
+
     return (
-      <View {...nativeProps} style={this.props.style.view}>
+      <View
+        {...nativeProps}
+        style={[this.props.style.view, this.props.style[viewSpecialStyle]]}
+      >
         <Text style={this.props.style.label}>{this.props.label}</Text>
-        {this.state.formState !== "edit" && <Text>{this.state.data}</Text>}
-        {this.state.formState === "edit" && this.props.children}
+        {mode !== "edit" && (
+          <Text style={this.props.style.value}>{this.state.data}</Text>
+        )}
+        {mode === "edit" && this.props.children}
       </View>
     );
   }
